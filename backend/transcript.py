@@ -118,36 +118,51 @@ def get_transcript(url: str) -> str:
     video_id = extract_video_id(url)
 
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        api = YouTubeTranscriptApi()
 
-        # Try manual English transcript
+        transcript_list = api.list(video_id)
+
         try:
             transcript = transcript_list.find_transcript(
                 ["en", "en-US", "en-GB", "en-IN"]
             )
-        except Exception:
-            # Fall back to auto-generated English transcript
+        except NoTranscriptFound:
             transcript = transcript_list.find_generated_transcript(
                 ["en", "en-US", "en-GB", "en-IN"]
             )
 
         fragments = transcript.fetch()
 
+        stitched = _stitch_transcript(fragments)
+
+        if not stitched:
+            raise TranscriptUnavailableError(
+                "Transcript is empty."
+            )
+
+        return stitched
+
     except TranscriptsDisabled:
         raise TranscriptUnavailableError(
-            "Transcripts are disabled for this video."
+            "Captions are disabled for this video."
         )
 
     except NoTranscriptFound:
         raise TranscriptUnavailableError(
-            "No English transcript was found for this video."
+            "No English transcript found."
         )
 
-    except Exception as exc:
+    except VideoUnavailable:
         raise TranscriptUnavailableError(
-            f"Transcript retrieval failed: {exc}"
+            "Video unavailable."
         )
-    if not stitched:
-        raise TranscriptUnavailableError("The transcript for this video was empty.")
 
-    return _stitch_transcript(fragments)
+    except CouldNotRetrieveTranscript:
+        raise TranscriptUnavailableError(
+            "Could not retrieve transcript."
+        )
+
+    except Exception as e:
+        raise TranscriptUnavailableError(
+            f"{type(e).__name__}: {e}"
+        )
