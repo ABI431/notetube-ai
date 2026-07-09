@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteTube AI — Turn any lecture into study notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="bg-glow bg-glow--one"></div>
+  <div class="bg-glow bg-glow--two"></div>
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark">NT</span>
+      <span class="brand-name">NoteTube <em>AI</em></span>
+    </div>
+    <a class="header-link" href="https://github.com" target="_blank" rel="noopener">View on GitHub</a>
+  </header>
+
+  <main class="workspace">
+
+    <section class="hero" id="hero-section">
+      <p class="eyebrow">Paste a link. Walk away with a study pack.</p>
+      <h1 class="hero-title">Any lecture,<br><span class="accent-text">distilled into notes.</span></h1>
+      <p class="hero-sub">NoteTube AI reads the transcript of a YouTube video and generates a full academic
+        study pack — summary, chapter notes, 20 MCQs with an answer key, and 10 interview questions — ready
+        to copy or download as a Word document.</p>
+
+      <form id="generate-form" class="input-shell" autocomplete="off">
+        <div class="input-shell__glow"></div>
+        <input
+          type="url"
+          id="youtube-url"
+          class="url-input"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+        >
+        <button type="submit" class="generate-btn" id="generate-btn">
+          <span class="btn-label">Generate Notes</span>
+          <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+
+      <p class="hint" id="form-hint">Works best on videos with captions enabled.</p>
+    </section>
+
+    <section class="results" id="results-section" hidden>
+
+      <div class="results-topbar">
+        <h2 class="video-title" id="result-video-title">Your Study Pack</h2>
+        <button class="copy-btn" id="copy-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M5 15H4C3.44772 15 3 14.5523 3 14V4C3 3.44772 3.44772 3 4 3H14C14.5523 3 15 3.44772 15 4V5" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span id="copy-btn-label">Copy Notes</span>
+        </button>
+      </div>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn is-active" data-tab="notes" role="tab" aria-selected="true">Study Notes</button>
+        <button class="tab-btn" data-tab="quiz" role="tab" aria-selected="false">Quizzes &amp; MCQs</button>
+        <button class="tab-btn" data-tab="interview" role="tab" aria-selected="false">Interview Prep</button>
+        <button class="tab-btn" data-tab="downloads" role="tab" aria-selected="false">Downloads</button>
+      </nav>
+
+      <div class="tab-panels">
+        <div class="tab-panel is-active" id="panel-notes" data-panel="notes"></div>
+        <div class="tab-panel" id="panel-quiz" data-panel="quiz"></div>
+        <div class="tab-panel" id="panel-interview" data-panel="interview"></div>
+        <div class="tab-panel" id="panel-downloads" data-panel="downloads">
+          <div class="download-card">
+            <div class="download-card__info">
+              <h3>Word Document</h3>
+              <p>A fully formatted .docx with cover page, styled headings, and tables — ready to print or annotate.</p>
+            </div>
+            <button class="download-btn" id="download-docx-btn" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Download .docx
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="error-banner" id="error-banner" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 8V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1" fill="currentColor"/>
+      </svg>
+      <p id="error-message">Something went wrong.</p>
+      <button id="error-dismiss" type="button" aria-label="Dismiss">&times;</button>
+    </section>
+
+  </main>
+
+  <div class="loading-overlay" id="loading-overlay" hidden>
+    <div class="loading-panel">
+      <div class="loading-spinner"></div>
+      <p class="loading-step" id="loading-step">Fetching transcript…</p>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>NoteTube AI — generated notes are study aids, not a substitute for the source material.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
