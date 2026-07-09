@@ -44,6 +44,8 @@
 
   const loadingOverlay = document.getElementById("loading-overlay");
   const loadingStep = document.getElementById("loading-step");
+  
+  loadingOverlay.hidden = true;
 
   // ---------------------------------------------------------------------
   // State
