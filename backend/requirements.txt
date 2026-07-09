@@ -1,6 +1,7 @@
 flask==3.0.3
 flask-cors==4.0.1
 python-dotenv==1.0.1
-youtube-transcript-api==0.6.2
+youtube-transcript-api==1.1.1
 google-genai==0.3.0
 python-docx==1.1.2
+gunicorn==23.0.0

@@ -115,50 +115,39 @@ def _stitch_transcript(transcript_fragments: list) -> str:
 
 
 def get_transcript(url: str) -> str:
-    """
-    Retrieve and stitch together the transcript for the given YouTube URL.
-
-    Raises:
-        InvalidYouTubeURLError: if the URL cannot be parsed.
-        TranscriptUnavailableError: if captions are disabled, missing, or the
-            video is unavailable.
-
-    Returns:
-        str: the full transcript as a single flowing paragraph.
-    """
     video_id = extract_video_id(url)
 
     try:
-        fragments = YouTubeTranscriptApi.get_transcript(
-            video_id,
-            languages=["en", "en-US", "en-GB", "en-IN"],
-        )
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+        # Try manual English transcript
+        try:
+            transcript = transcript_list.find_transcript(
+                ["en", "en-US", "en-GB", "en-IN"]
+            )
+        except Exception:
+            # Fall back to auto-generated English transcript
+            transcript = transcript_list.find_generated_transcript(
+                ["en", "en-US", "en-GB", "en-IN"]
+            )
+
+        fragments = transcript.fetch()
+
     except TranscriptsDisabled:
         raise TranscriptUnavailableError(
-            "This video's creator has disabled captions/transcripts. "
-            "Try a different video that has captions enabled."
+            "Transcripts are disabled for this video."
         )
+
     except NoTranscriptFound:
         raise TranscriptUnavailableError(
-            "No transcript could be found for this video in a supported "
-            "language (en, en-US, en-GB, en-IN)."
-        )
-    except VideoUnavailable:
-        raise TranscriptUnavailableError(
-            "This video is unavailable (private, deleted, or region-locked)."
-        )
-    except CouldNotRetrieveTranscript as exc:
-        raise TranscriptUnavailableError(f"Could not retrieve transcript: {exc}")
-    except Exception as exc:  # noqa: BLE001 - final safety net, re-raised clearly
-        raise TranscriptUnavailableError(
-            f"Unexpected error while fetching the transcript: {exc}"
+            "No English transcript was found for this video."
         )
 
-    stitched = _stitch_transcript(fragments)
-
+    except Exception as exc:
+        raise TranscriptUnavailableError(
+            f"Transcript retrieval failed: {exc}"
+        )
     if not stitched:
-        raise TranscriptUnavailableError(
-            "The transcript for this video was empty after processing."
-        )
+        raise TranscriptUnavailableError("The transcript for this video was empty.")
 
-    return stitched
+    return _stitch_transcript(fragments)
