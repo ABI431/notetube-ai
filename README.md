@@ -21,6 +21,10 @@ notetube-ai/
 └── README.md
 ```
 
+## 🚀 Live Application 
+https://notetube-ai-zeta.vercel.app/
+
+
 ## 1. Prerequisites
 
 - Python 3.11+
